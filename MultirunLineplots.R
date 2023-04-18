@@ -1,6 +1,6 @@
-source("PlotFunction.r")
-# katie d basic social learning model
 set.seed(111)
+
+
 
 
 fclip <- function(x,lo=0,hi=1) ifelse( x < lo , lo , ifelse( x > hi , hi , x ) ) #constrains to 0:1
@@ -152,61 +152,6 @@ simrogers <- function( tmax=1000 , b=1 , k=0.75 , u=.01, w0=5 , n=100 ,
 basefit <- function(w) {sum(log(w))/100}
 
 
-
-
-
-# tmax : number of generations to simulate
-# b : benefit of adaptive behavior
-# k : cost of individual learning, as proportion of b
-# u : chance environment changes
-# W0: Baseline fitness
-# n : population size
-# mu: mutation size
-# s : success rate of individual learning
-# l : cost of random copying
-# j : cost of evaluating content
-# m : cost of success bias
-# f : cost of copying parent
-#apt: Probability that success biased learning leads to appropriate variant
-# pw: Scales probability that successful individuals copied  (leave at 0)
-# qs: sample size of individuals observable for content bias
-
-
-
-#####This code is for a SINGLE run and plot of the model################################
-#commented out for final figures
-
-#simulate across many values
-#set.seed(111)
-#dsim <- data.frame(u=0,p=0,p2=0,p3=0,p4=0, w=0)
-#k1list <- c(.01, .05, .1, .2, .3, .4, .5, .6) # k values to loop over
-#rownum <- 1
-
-#for ( k1 in k1list ) {
- # x <- simrogers(
-#favoring no specific learning bias
-#tmax=5000, b=1 , k=0.5 , u=k1, w0=5 , n=1000 , mu=0.001 , s=0.5 , j=0.5, m=0.5, l=0.5, f=0.5, apt=.5, pw = 0, qs = 3,sv=0.1)
-#favoring content bias
-#tmax=5000, b=1 , k=0.5 , u=k1, w0=5 , n=1000 , mu=0.001 , s=0.5 , j=0.1, m=0.5, l=0.5, f=0.5, apt=.1, pw = 0, qs = 3,sv=0.1)
-#  Ep <- mean( x$p[800:1000] ) #just show final levels
-#  Ep2 <- mean( x$p2[800:1000] )
-#  Ep3 <- mean( x$p3[800:1000] )
-#  Ep4 <- mean( x$p4[800:1000] )
-#  Ew <- basefit( x$w[800:1000])
-#  dsim[rownum,] <- c(k1,Ep, Ep2, Ep3, Ep4, Ew)
-#  print( dsim[rownum,] )
-#  rownum <- rownum + 1
-  
-#}
-
-
-
-#Simplot(dsim)
-
-#########################End SINGLE run and plot of the model#####################################
-
-###
-
 ###################### This code is for MULTIPLE runs of the model ####################################
 #multiruns
 set.seed(111)
@@ -243,6 +188,7 @@ dsim <- data.frame(u=0,p=0,p2=0,p3=0,p4=0, w=0)
 
 }
 
+library(tidyverse)
 
 dsimplt<-dat%>%
   group_by(run)%>%mutate(EnvironmentalChangeRate=u,
