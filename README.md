@@ -15,4 +15,4 @@ Note that when the simulation is set for 10 runs at a population size of 1,000 f
 
 Also note that both scripts require users to have the 'tidyverse' suite of packages installed. 
 
-**Matt Clark, 18 April 2023**
+**Matt Clark, Kathryn Demps, Nicole Herzog, 18 April 2023**
