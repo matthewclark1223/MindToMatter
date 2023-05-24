@@ -1,8 +1,6 @@
+#source("PlotFunction.r")
+# katie d basic social learning model
 set.seed(111)
-
-
-
-
 fclip <- function(x,lo=0,hi=1) ifelse( x < lo , lo , ifelse( x > hi , hi , x ) ) #constrains to 0:1
 
 # steady state mean p for this model is supposed to be E(p) = u(s-k)/(k(1-u))
@@ -27,12 +25,12 @@ simrogers <- function( tmax=1000 , b=1 , k=0.75 , u=.01, w0=5 , n=100 ,
   # sv: starting variance of the initialized population. Matt changed from using mutation size
   
   # init history variables
-  ph <- {rep(NA,tmax)}
-  p2h <-{rep(NA,tmax)}
-  p3h <-{rep(NA,tmax)}
-  p4h <-{rep(NA,tmax)}
-  qh <- {rep(NA,tmax)}
-  wh <- {rep(NA,tmax)}
+  ph <- {}
+  p2h <-{}
+  p3h <-{}
+  p4h <-{}
+  qh <- {}
+  wh <- {}
   
   # initialize population
   # p is heritable prob of individual learning
@@ -40,8 +38,6 @@ simrogers <- function( tmax=1000 , b=1 , k=0.75 , u=.01, w0=5 , n=100 ,
   # p3 is heritable prob of using content bias
   # p4 is heritable prob of using success or kin bias
   # q is 0,1 adaptive value of behavior
-  
-  #This first 0.5 is the proportion of learners starting with individual learning!!!!
   p <- rnorm( n , 0.5 , sv ) #Mean of each is 0.5, variance is the mutation size (we might consider changing that to be a seperate parameter)
   p <- fclip(p) # All values between 0 and 1
   p2 <- rnorm( n, 0.5, sv )
@@ -149,89 +145,89 @@ simrogers <- function( tmax=1000 , b=1 , k=0.75 , u=.01, w0=5 , n=100 ,
 
 
 #function for geographic mean
-basefit <- function(w) {sum(log(w))/100}
+basefit <- function(w) {sum(log(w))/200}
 
 
-###################### This code is for MULTIPLE runs of the model ####################################
-#multiruns
-set.seed(111)
-
-dsim <- data.frame(u=0,p=0,p2=0,p3=0,p4=0, w=0)
-k1list <- c(.01, .05, .1, .2, .3, .4, .5, .6) # k values to loop over
-rownum <- 1
 
 
-dat<-dsim
-dat<-dat[-(1:8),]
-for (r in 1:10){    #the number of runs (10)
+
+# tmax : number of generations to simulate
+# b : benefit of adaptive behavior
+# k : cost of individual learning, as proportion of b
+# u : chance environment changes
+# W0: Baseline fitness
+# n : population size
+# mu: mutation size
+# s : success rate of individual learning
+# l : cost of random copying
+# j : cost of evaluating content
+# m : cost of success bias
+# f : cost of copying parent
+#apt: Probability that success biased learning leads to appropriate variant
+# pw: Scales probability that successful individuals copied  (leave at 0)
+# qs: sample size of individuals observable for content bias
+
+
+
+FillDat<-data.frame(expand.grid(PopSize=c(500,1000,2000,3000,4000),Run=1:4,EnvVar=c(.1,.2,.3,.4,.5)),
+                    Success=rep(NA),Independant=rep(NA),Content=rep(NA),Unbiased=rep(NA) )
+
+
+
+
+for(i in 1:nrow(FillDat)){
   
-  rownum <- 1
-  for ( k1 in k1list ) {
-    x <- simrogers(
-      #favoring no specific learning bias
-      tmax=5000, b=1 , k=0.5 , u=k1, w0=5 , n=10000 , mu=0.005 , s=0.5 , j=0.5, m=0.5, l=0.5, f=0.5, apt=.5, pw = 0, qs = 3,sv=0.1)
-    #favoring content bias
-    #tmax=5000, b=1 , k=0.5 , u=k1, w0=5 , n=1000 , mu=0.001 , s=0.5 , j=0.1, m=0.5, l=0.5, f=0.5, apt=.1, pw = 0, qs = 3,sv=0.1)
+  dsim <- data.frame(u=0,p=0,p2=0,p3=0,p4=0, w=0)
+    x <- simrogers(tmax=5000, b=1 , k=0.5 , u=FillDat[i,]$EnvVar, w0=5 , n=FillDat[i,]$PopSize , mu=0.005 , s=0.5 , j=0.5, m=0.5, l=0.5, f=0.5, apt=0.5, pw = 0, qs = 3,sv=0.1)
     Ep <- mean( x$p[4800:5000] ) #just show final levels
     Ep2 <- mean( x$p2[4800:5000] )
     Ep3 <- mean( x$p3[4800:5000] )
     Ep4 <- mean( x$p4[4800:5000] )
     Ew <- basefit( x$w[4800:5000])
-    dsim[rownum,] <- c(k1,Ep, Ep2, Ep3, Ep4, Ew)
-    print( dsim[rownum,] )
-    rownum <- rownum + 1
+    dsim[1,] <- c(k1,Ep, Ep2, Ep3, Ep4, Ew)
+    print( paste0(i,"%") )
     
-  }
-  dsim$run<-rep(r,nrow(dsim))
-  dat<-rbind(dat,dsim)
-  dsim <- data.frame(u=0,p=0,p2=0,p3=0,p4=0, w=0)
+  
+  
+  
+    FillDat[i,]$Independant=dsim$p
+    FillDat[i,]$Unbiased= (1-dsim$p)*dsim$p2
+    FillDat[i,]$Success = (1-dsim$p)*(1-dsim$p2)*(1-dsim$p3)*dsim$p4
+    FillDat[i,]$Content = (1-dsim$p)*(1-dsim$p2)*dsim$p3
   
 }
 
-write.csv(dat,"datDELETE.csv")
-library(tidyverse)
 
-dsimplt<-dat%>%
-  group_by(run)%>%mutate(EnvironmentalChangeRate=u,
-                         Independant=p,
-                         UnbiasedCopying= (1-p)*p2,
-                         ContentBiasedCopying = (1-p)*(1-p2)*p3,
-                         KinBiasedCopying = (1-p)*(1-p2)*(1-p3)*(1-p4),
-                         SuccessBiasedCopying = (1-p)*(1-p2)*(1-p3)*p4 )%>%
-  select(EnvironmentalChangeRate,Independant,UnbiasedCopying,ContentBiasedCopying,
-         KinBiasedCopying,SuccessBiasedCopying,run)%>%
-  tidyr::pivot_longer(Independant:SuccessBiasedCopying,names_to = "LearningType",values_to = "PropPop")%>%
-  ungroup()%>%mutate(run=as.character(run))
+write.csv(FillDat,"PopVariationSweep_01Mu.csv")
 
-write.csv(dsimplt,"PopSize_10000.csv")
-
-cols<-c("Independant" = "black", 
-        "Unbiased Copying" = "#a6cee3",
-        "Content Biased Copying" = "#1f78b4",
-        "Kin Biased Copying"= "#b2df8a",
-        "Success Biased Copying"="#33a02c")
-
-mytheme<- theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                plot.title = element_text( size=20, color="black",face="bold"),
-                axis.title.x = element_text( size=20),
-                axis.title.y = element_text( size=20),
-                axis.text=(element_text(color="black", size=16)),
-                legend.title = element_text(colour="black", size=20),
-                legend.text = element_text( size = 16))
-
-dsimpltMed<-dsimplt%>%group_by(LearningType,EnvironmentalChangeRate)%>%summarise(medProp=median(PropPop))%>%
-  ungroup()%>%mutate(run=rep("1",40))
-
-ggplot(dsimplt,aes(x=EnvironmentalChangeRate,y=PropPop, fill=run  ))+
-  geom_line(aes(color=LearningType),size=2,alpha=0.6)+#geom_point(aes(shape=LearningType),size=4)+
-  geom_line(data=dsimpltMed,aes(x=EnvironmentalChangeRate,group=LearningType,y=medProp),linetype=2,size=2)+
-  theme_classic()+mytheme+#scale_color_manual(values=cols)
-  ylim(0,1)+
-  ylab("Proportion of population")+xlab("Rate of environmental change")+
-  scale_colour_viridis_d( labels=c("Content biased copying","Individual learning", 
-                                   "Unbiased copying" ,
-                                   "Kin biased copying",
-                                   "Success biased copying"),name="Learning type")
+FillDat<-read.csv("PopVariationSweep.csv")
+FillDat%>%
+  group_by(PopSize,SelPress)%>%
+  summarise(MedDif=median(IndVsCopyDif))%>%
+  ggplot(.,aes(x=PopSize,y=SelPress,fill=MedDif))+
+  geom_tile()+
+  scale_x_log10()+
+  scale_fill_viridis_b(name="Difference in\ndifference" )+theme_bw()+
+  theme(panel.grid = element_blank(),axis.text = element_text(size=14,color="black"),
+        axis.title = element_text(color="black",size=18),
+        legend.text = element_text(size=12,color="black"),
+        legend.title = element_text(size=14,color="black"))+
+  ylab("Selection pressure")+xlab("Population size")
 
 
 
+
+
+FillDat%>%
+  group_by(PopSize,SelPress)%>%
+  #summarise(SDDif=sd(IndVsCopyDif))%>%
+  summarise(SDDif=range(IndVsCopyDif)[2]-range(IndVsCopyDif)[1])%>%
+  ggplot(.,aes(x=PopSize,y=SelPress,fill=SDDif))+
+  scale_x_log10()+
+  geom_tile()+
+  scale_fill_viridis_b(name="Range\nin outcome")+theme_bw()+
+  theme(panel.grid = element_blank(),axis.text = element_text(size=14,color="black"),
+        axis.title = element_text(color="black",size=18),
+        legend.text = element_text(size=12,color="black"),
+        legend.title = element_text(size=14,color="black"))+
+  ylab("Selection pressure")+xlab("Population size")
