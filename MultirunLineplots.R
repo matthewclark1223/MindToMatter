@@ -163,13 +163,13 @@ rownum <- 1
 
 dat<-dsim
 dat<-dat[-(1:8),]
-for (r in 1:10){    #the number of runs (10)
+for (r in 1:1){    #the number of runs (10)
   
   rownum <- 1
   for ( k1 in k1list ) {
     x <- simrogers(
       #favoring no specific learning bias
-      tmax=5000, b=1 , k=0.5 , u=k1, w0=5 , n=10000 , mu=0.005 , s=0.5 , j=0.5, m=0.5, l=0.5, f=0.5, apt=.5, pw = 0, qs = 3,sv=0.1)
+      tmax=5000, b=1 , k=0.5 , u=k1, w0=5 , n=1000 , mu=0.005 , s=0.5 , j=0.5, m=0.5, l=0.5, f=0.5, apt=.5, pw = 0, qs = 3,sv=0.1)
     #favoring content bias
     #tmax=5000, b=1 , k=0.5 , u=k1, w0=5 , n=1000 , mu=0.001 , s=0.5 , j=0.1, m=0.5, l=0.5, f=0.5, apt=.1, pw = 0, qs = 3,sv=0.1)
     Ep <- mean( x$p[4800:5000] ) #just show final levels
@@ -188,7 +188,7 @@ for (r in 1:10){    #the number of runs (10)
   
 }
 
-write.csv(dat,"datDELETE.csv")
+write.csv(dat,"datSINGLE.csv")
 library(tidyverse)
 
 dsimplt<-dat%>%
@@ -203,7 +203,7 @@ dsimplt<-dat%>%
   tidyr::pivot_longer(Independant:SuccessBiasedCopying,names_to = "LearningType",values_to = "PropPop")%>%
   ungroup()%>%mutate(run=as.character(run))
 
-write.csv(dsimplt,"PopSize_10000.csv")
+write.csv(dsimplt,"datSINGLE.csv")
 
 cols<-c("Independant" = "black", 
         "Unbiased Copying" = "#a6cee3",

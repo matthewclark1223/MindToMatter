@@ -1,6 +1,7 @@
 library(tidyverse)
 #load data
 dsimplt<-read.csv("~/DempsSocialLearningABM/DempsSocialLearningABM/Data/LinePlotData/StartingProportionsNoFavor/PropStart_08.csv")
+dsimplt<-read.csv("~/DempsSocialLearningABM/DempsSocialLearningABM/Data/LinePlotData/datSINGLE.csv")
 
 #make the median line df
 dsimpltMed<-dsimplt%>%group_by(LearningType,EnvironmentalChangeRate)%>%summarise(medProp=median(PropPop))%>%

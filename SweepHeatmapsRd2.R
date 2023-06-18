@@ -1,6 +1,8 @@
 library(dplyr)
 library(ggplot2)
-dat<-read.csv("~/DempsSocialLearningABM/DempsSocialLearningABM/Data/ParameterSweeps/PopVariationSweepCaseStudy.csv") # mu of 0.001
+#dat<-read.csv("~/DempsSocialLearningABM/DempsSocialLearningABM/Data/ParameterSweeps/PopVariationSweepCaseStudy.csv") # mu of 0.001
+#dat<-read.csv("~/DempsSocialLearningABM/DempsSocialLearningABM/Data/ParameterSweeps/PopVariationSweepCaseStudyHighPressureb2.csv") # mu of 0.001
+dat<-read.csv("~/DempsSocialLearningABM/DempsSocialLearningABM/Data/ParameterSweeps/PopVariationSweepCaseStudyHighPressureb3.csv") # mu of 0.001
 #dat<-read.csv("PopVariationSweep_005Mu.csv") #mu of 0.005
 
 #dat<-FillDat
@@ -34,6 +36,8 @@ dat%>%mutate(SocialLearn=Success+Content+Unbiased)%>%
   ylab("Population size")+xlab("Rate of environmental change")
 
 
+
+#look at variability
 
 dat%>%mutate(SocialLearn=Success+Content+Unbiased)%>%
   mutate(IndMinusSocial=Independant-SocialLearn)%>%
